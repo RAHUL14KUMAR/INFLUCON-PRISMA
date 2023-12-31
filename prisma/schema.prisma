@@ -72,7 +72,7 @@ model Video {
 
 model Comment {
   id          String      @id @default(auto()) @map("_id") @db.ObjectId 
-  rating      Int
+  rating      String?
   comment     String
   createdDate DateTime @default(now())
   courseId    String  @db.ObjectId

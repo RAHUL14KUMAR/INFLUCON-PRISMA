@@ -47,6 +47,7 @@ export async function GET(request:Request,{params}:any){
         },
         include: {
             videos: true,
+            comments:true
         },
     })
     if(course){
