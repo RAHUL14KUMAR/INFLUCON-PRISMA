@@ -1,0 +1,91 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+}
+
+model Account {
+  id                 String @id @default(auto()) @map("_id") @db.ObjectId
+  user_id            String @db.ObjectId
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.String
+  access_token       String?  @db.String
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.String
+  session_state      String?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model User {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId 
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  hashedPassword String?
+  phoneNumber   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  role          Role      @default(USER)
+  accounts      Account[]
+  purchased     CourseUser[]
+}
+
+enum Role {
+  USER
+  ADMIN
+  CREATOR
+}
+
+model Course {
+  courseid           String      @id @default(auto())  @map("_id") @db.ObjectId
+  courseName         String?
+  courseDescription  String?
+  price              String?
+  category           String?
+  purchasedBy        CourseUser[]
+  createdBy          String?
+  creatorDescription String?
+  videos             Video[]
+  comments           Comment[]
+}
+
+model Video {
+  videoid    String      @id @default(auto()) @map("_id") @db.ObjectId 
+  title      String?
+  description String?
+  createdAt  DateTime @default(now())
+  url        String?
+  courseId String @db.ObjectId
+  course     Course   @relation(fields: [courseId], references: [courseid])
+}
+
+model Comment {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId 
+  rating      Int
+  comment     String
+  createdDate DateTime @default(now())
+  courseId    String  @db.ObjectId
+  course      Course   @relation(fields: [courseId], references: [courseid])
+}
+
+model CourseUser {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  courseId  String @db.ObjectId
+  userId    String @db.ObjectId
+  createdAt DateTime @default(now())
+  courseDescription Json[]
+  user      User @relation(fields: [userId], references: [id])
+  course    Course @relation(fields: [courseId], references: [courseid])
+  @@unique([courseId, userId])
+}
